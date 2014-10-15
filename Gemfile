@@ -33,7 +33,7 @@ gem 'spring',        group: :development
 # gem 'unicorn'
 
 group :development, :test do
-  gem 'eycap', :require => :false
+  gem 'eycap', :require => false
   gem 'capistrano', '~> 2.15'
   gem 'net-ssh', '~> 2.7.0'
   gem 'capistrano-rbenv'
