@@ -21,25 +21,25 @@ set :ssh_options, {:forward_agent => true, keys: ['~/.vagrant.d/insecure_private
 
 after "deploy", "deploy:cleanup" # keep only the last 5 releases
 
-  namespace :deploy do
-
-    task :restart, :roles => :app do
-      # mongrel.restart
-    end
-
-
-    task :spinner, :roles => :app do
-      # mongrel.start
-    end
-
-
-    task :start, :roles => :app do
-      # mongrel.start
-    end
-
-
-    task :stop, :roles => :app do
-      # mongrel.stop
-    end
-
+namespace :deploy do
+  task :restart, :roles => :app do
+    # mongrel.restart
   end
+
+  task :spinner, :roles => :app do
+    # mongrel.start
+  end
+
+  task :start, :roles => :app do
+    # mongrel.start
+  end
+
+  task :stop, :roles => :app do
+    # mongrel.stop
+  end
+
+  task :symlink_config, roles: :app do
+    run "ln -nfs #{shared_path}/config/database.yml #{release_path}/config/database.yml"
+  end
+  after "deploy:finalize_update", "deploy:symlink_config"
+end
