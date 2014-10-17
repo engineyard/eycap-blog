@@ -22,21 +22,22 @@ set :ssh_options, {:forward_agent => true, keys: ['~/.vagrant.d/insecure_private
 after "deploy", "deploy:cleanup" # keep only the last 5 releases
 
 namespace :deploy do
-  task :restart, :roles => :app do
-    # mongrel.restart
+  %w[start stop restart].each do |command|
+    desc "#{command} unicorn server"
+    task command, roles: :app, except: {no_release: true} do
+      run "/etc/init.d/unicorn_#{application} #{command}"
+    end
   end
 
-  task :spinner, :roles => :app do
-    # mongrel.start
+  task :setup_config, roles: :app do
+    sudo "ln -nfs #{current_path}/config/nginx.conf /etc/nginx/sites-enabled/#{application}"
+    sudo "ln -nfs #{current_path}/config/unicorn_init.sh /etc/init.d/unicorn_#{application}"
+    run "mkdir -p #{shared_path}/config"
+    put File.read("config/database.example.yml"), "#{shared_path}/config/database.yml"
+    put File.read("config/secrets.example.yml"), "#{shared_path}/config/secrets.yml"
+    puts "Now edit the config files in #{shared_path}."
   end
-
-  task :start, :roles => :app do
-    # mongrel.start
-  end
-
-  task :stop, :roles => :app do
-    # mongrel.stop
-  end
+  after "deploy:setup", "deploy:setup_config"
 
   task :symlink_config, roles: :app do
     run "ln -nfs #{shared_path}/config/database.yml #{release_path}/config/database.yml"
